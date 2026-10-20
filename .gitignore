@@ -24,3 +24,6 @@ Thumbs.db
 
 # original logo upload (a copy lives in brand/rapid-layers-logo-original.jpg)
 S__40886283_0.jpg
+
+# third-party page captures from link verification (kept local only)
+docs/verification/

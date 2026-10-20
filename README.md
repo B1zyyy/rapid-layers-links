@@ -5,6 +5,8 @@
 - **แก้ข้อมูลร้านค้า:** `src/data/stores.json` — ดูคู่มือฉบับเต็มที่ [STORE_MANAGEMENT.md](STORE_MANAGEMENT.md)
 - **แก้ข้อความแบรนด์/หน้าเว็บ:** `src/data/site.json`
 
+เอกสารส่งมอบงานและภาพหน้าจอ: [docs/HANDOVER.md](docs/HANDOVER.md)
+
 ## Tech stack
 
 | ส่วน | เครื่องมือ |
