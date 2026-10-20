@@ -1,0 +1,17 @@
+{
+  "brandName": "Rapid Layers",
+  "tagline": "Official Store Links",
+  "pageTitle": "Rapid Layers | Official Store Links",
+  "metaDescription": "Discover Rapid Layers across our official online store platforms.",
+  "labels": {
+    "moreOptions": "More options for",
+    "share": "Share store link",
+    "copy": "Copy store link",
+    "close": "Close",
+    "linkFieldLabel": "Store link",
+    "copied": "Link copied to clipboard.",
+    "sharedFallbackCopied": "Sharing isn't available in this browser, so the link was copied instead.",
+    "copyFailed": "Couldn't copy automatically. The link is selected below — press and hold (or Ctrl+C) to copy it.",
+    "shareFailed": "Couldn't open the share menu. You can copy the link below instead."
+  }
+}

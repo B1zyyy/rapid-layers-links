@@ -1,0 +1,149 @@
+---
+// One store link. The whole card opens the store; the "more" button is a separate
+// control (not nested in the link) so opening the menu never navigates.
+import PlatformIcon from './PlatformIcon.astro';
+import type { Store } from '../lib/stores.ts';
+
+interface Props {
+  store: Store;
+  href: string;
+  shareUrl: string;
+  moreOptionsLabel: string;
+}
+
+const { store, href, shareUrl, moreOptionsLabel } = Astro.props;
+const thaiPattern = /[฀-๿]/;
+const langOf = (text: string) => (thaiPattern.test(text) ? 'th' : undefined);
+const isExternal = store.kind === 'external';
+---
+
+<li class="card" data-store-id={store.id}>
+  <PlatformIcon icon={store.icon} />
+  <a
+    class="card__link"
+    href={href}
+    rel={isExternal ? 'noopener noreferrer' : undefined}
+    type={store.kind === 'file' && store.url.toLowerCase().endsWith('.pdf') ? 'application/pdf' : undefined}
+    data-store-link
+  >
+    <span class="card__name" lang={langOf(store.name)}>{store.name}</span>
+    {store.description && <span class="card__desc" lang={langOf(store.description)}>{store.description}</span>}
+  </a>
+  <button
+    class="card__more"
+    type="button"
+    aria-haspopup="dialog"
+    aria-controls="share-sheet"
+    aria-label={`${moreOptionsLabel} ${store.name}`}
+    data-share-trigger
+    data-name={store.name}
+    data-url={shareUrl}
+  >
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor" aria-hidden="true">
+      <circle cx="5" cy="12" r="2"></circle>
+      <circle cx="12" cy="12" r="2"></circle>
+      <circle cx="19" cy="12" r="2"></circle>
+    </svg>
+  </button>
+</li>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    min-height: 76px;
+    padding: var(--space-3) var(--space-2) var(--space-3) var(--space-3);
+    background: var(--color-surface);
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-card);
+    box-shadow: 0 var(--layer-offset) 0 var(--color-ink);
+    transition:
+      transform var(--duration) ease,
+      box-shadow var(--duration) ease;
+  }
+
+  .card__link {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Stretch the link over the whole card so the entire card is the tap target. */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: calc(var(--border-width) * -1);
+    border-radius: var(--radius-card);
+  }
+
+  .card__link:focus-visible {
+    outline: none;
+  }
+
+  .card__link:focus-visible::after {
+    outline: var(--focus-ring);
+    outline-offset: 4px;
+  }
+
+  .card__name {
+    font-size: 1.0625rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .card__desc {
+    margin-top: 2px;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    color: var(--color-ink-muted);
+  }
+
+  .card__more {
+    position: relative; /* sits above the stretched link */
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--tap-size);
+    height: var(--tap-size);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--color-ink);
+    cursor: pointer;
+    transition: background-color var(--duration) ease;
+  }
+
+  .card__more:hover {
+    background: var(--color-bg-deep);
+  }
+
+  .card__more:active {
+    background: #fde68a;
+  }
+
+  @media (hover: hover) {
+    .card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 calc(var(--layer-offset) + 2px) 0 var(--color-accent);
+    }
+  }
+
+  .card:has(.card__link:active) {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 var(--color-ink);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card:hover,
+    .card:has(.card__link:active) {
+      transform: none;
+    }
+  }
+</style>

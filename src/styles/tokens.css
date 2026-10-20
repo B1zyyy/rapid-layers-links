@@ -1,0 +1,52 @@
+/*
+ * Rapid Layers design tokens.
+ * Colour ratio guide: ~60% white / light yellow, ~30% navy, ~10% orange.
+ * Contrast of every text/background pair below is checked in tests/unit/contrast.test.ts.
+ */
+:root {
+  /* 60% — light surfaces */
+  --color-bg: #fffbeb;          /* light yellow page background */
+  --color-bg-deep: #fef3c7;     /* deeper light yellow for icon tiles */
+  --color-surface: #ffffff;     /* cards, sheet */
+
+  /* 30% — navy */
+  --color-ink: #0f1b3d;         /* primary text, borders, card "layer" */
+  --color-ink-muted: #3d4a69;   /* secondary text */
+
+  /* 10% — orange accent */
+  --color-accent: #f97316;      /* fills and decoration (pair with navy text) */
+  --color-accent-ink: #c2410c;  /* orange used as text on light backgrounds */
+
+  /* logo layer colours, used only for decoration */
+  --color-layer-yellow: #fde047;
+  --color-layer-orange: #f97316;
+  --color-layer-red: #e11d1d;
+
+  /* feedback */
+  --color-success: #166534;
+  --color-error: #b91c1c;
+
+  /* platform brand colours (from each platform's brand guidelines) */
+  --color-line: #06c755;
+  --color-facebook: #0866ff;
+
+  --font-sans: 'Inter Variable', 'Noto Sans Thai Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --radius-card: 16px;
+  --radius-tile: 12px;
+  --radius-pill: 999px;
+  --border-width: 2px;
+  --layer-offset: 4px;          /* depth of the solid "layer" under cards */
+  --focus-ring: 3px solid var(--color-ink);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  --tap-size: 44px;
+  --duration: 140ms;
+}

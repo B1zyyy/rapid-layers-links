@@ -1,0 +1,38 @@
+[
+  {
+    "id": "website",
+    "enabled": true,
+    "order": 1,
+    "name": "เว็บไซต์ Rapid Layers",
+    "description": "ส่งไฟล์เพื่อประมาณราคาและสั่งปริ้น",
+    "url": "https://rapid-layers.com/th/contact",
+    "icon": "website"
+  },
+  {
+    "id": "line",
+    "enabled": true,
+    "order": 2,
+    "name": "LINE Official",
+    "description": "ช่องทางหลักในการออกแบบและแจ้งปัญหา",
+    "url": "https://lin.ee/PcYmKD6",
+    "icon": "line"
+  },
+  {
+    "id": "facebook",
+    "enabled": true,
+    "order": 3,
+    "name": "Facebook",
+    "description": "เพจร้านทาง Facebook",
+    "url": "https://www.facebook.com/profile.php?id=61589890161692",
+    "icon": "facebook"
+  },
+  {
+    "id": "store-4",
+    "enabled": false,
+    "order": 4,
+    "name": "",
+    "description": "",
+    "url": "",
+    "icon": ""
+  }
+]

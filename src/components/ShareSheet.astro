@@ -1,0 +1,327 @@
+---
+// One shared action sheet for every store card. A bottom sheet on phones, a centred dialog on larger screens.
+interface Props {
+  labels: {
+    share: string;
+    copy: string;
+    close: string;
+    linkFieldLabel: string;
+    copied: string;
+    sharedFallbackCopied: string;
+    copyFailed: string;
+    shareFailed: string;
+  };
+}
+
+const { labels } = Astro.props;
+---
+
+<dialog
+  id="share-sheet"
+  class="sheet"
+  aria-labelledby="share-sheet-title"
+  data-msg-copied={labels.copied}
+  data-msg-fallback-copied={labels.sharedFallbackCopied}
+  data-msg-copy-failed={labels.copyFailed}
+  data-msg-share-failed={labels.shareFailed}
+>
+  <div class="sheet__panel">
+    <div class="sheet__grip" aria-hidden="true"></div>
+    <div class="sheet__header">
+      <h2 class="sheet__title" id="share-sheet-title" data-sheet-title></h2>
+      <button class="sheet__close" type="button" aria-label={labels.close} data-sheet-close>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.25" stroke-linecap="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+
+    <label class="sheet__label" for="share-sheet-url">{labels.linkFieldLabel}</label>
+    <input class="sheet__url" id="share-sheet-url" type="text" readonly spellcheck="false" data-sheet-url />
+
+    <div class="sheet__actions">
+      <button class="btn btn--primary" type="button" data-sheet-share>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+          <path d="m16 6-4-4-4 4"></path>
+          <path d="M12 2v13"></path>
+        </svg>
+        {labels.share}
+      </button>
+      <button class="btn btn--secondary" type="button" data-sheet-copy>
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect width="14" height="14" x="8" y="8" rx="2"></rect>
+          <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+        </svg>
+        {labels.copy}
+      </button>
+    </div>
+
+    <p class="sheet__status" role="status" aria-live="polite" data-sheet-status></p>
+  </div>
+</dialog>
+
+<script>
+  import { browserShareEnvironment, copyText, shareLink, type ShareOutcome } from '../scripts/share.ts';
+
+  const dialog = document.querySelector<HTMLDialogElement>('#share-sheet');
+  const title = dialog?.querySelector<HTMLElement>('[data-sheet-title]');
+  const field = dialog?.querySelector<HTMLInputElement>('[data-sheet-url]');
+  const status = dialog?.querySelector<HTMLElement>('[data-sheet-status]');
+  const shareButton = dialog?.querySelector<HTMLButtonElement>('[data-sheet-share]');
+  const copyButton = dialog?.querySelector<HTMLButtonElement>('[data-sheet-copy]');
+  const closeButton = dialog?.querySelector<HTMLButtonElement>('[data-sheet-close]');
+
+  if (dialog && title && field && status && shareButton && copyButton && closeButton) {
+    let current = { name: '', url: '' };
+    let trigger: HTMLElement | null = null;
+
+    const setStatus = (message: string, tone: 'success' | 'error' | '' = '') => {
+      status.textContent = message;
+      status.dataset.tone = tone;
+    };
+
+    const selectField = () => {
+      field.focus();
+      field.select();
+    };
+
+    const open = (button: HTMLElement) => {
+      trigger = button;
+      current = { name: button.dataset.name ?? '', url: button.dataset.url ?? '' };
+      title.textContent = current.name;
+      field.value = current.url;
+      setStatus('');
+      dialog.showModal();
+      shareButton.focus();
+    };
+
+    const close = () => {
+      if (dialog.open) dialog.close();
+    };
+
+    dialog.addEventListener('close', () => {
+      trigger?.focus();
+      trigger = null;
+    });
+
+    for (const button of document.querySelectorAll<HTMLElement>('[data-share-trigger]')) {
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        open(button);
+      });
+    }
+
+    closeButton.addEventListener('click', close);
+
+    // Tapping the dimmed backdrop (outside the panel) closes the sheet.
+    dialog.addEventListener('click', (event) => {
+      if (event.target === dialog) close();
+    });
+
+    field.addEventListener('focus', () => field.select());
+
+    copyButton.addEventListener('click', async () => {
+      const ok = await copyText(current.url, browserShareEnvironment(field));
+      if (ok) {
+        setStatus(dialog.dataset.msgCopied ?? '', 'success');
+        copyButton.focus();
+      } else {
+        setStatus(dialog.dataset.msgCopyFailed ?? '', 'error');
+        selectField();
+      }
+    });
+
+    shareButton.addEventListener('click', async () => {
+      const outcome: ShareOutcome = await shareLink(current.name, current.url, browserShareEnvironment(field));
+      switch (outcome) {
+        case 'shared':
+          close();
+          break;
+        case 'cancelled':
+          setStatus('');
+          break;
+        case 'copied-instead':
+          setStatus(dialog.dataset.msgFallbackCopied ?? '', 'success');
+          shareButton.focus();
+          break;
+        case 'share-failed':
+          setStatus(dialog.dataset.msgShareFailed ?? '', 'error');
+          selectField();
+          break;
+        case 'copy-failed':
+          setStatus(dialog.dataset.msgCopyFailed ?? '', 'error');
+          selectField();
+          break;
+      }
+    });
+  }
+</script>
+
+<style>
+  .sheet {
+    width: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: auto 0 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--color-ink);
+  }
+
+  .sheet::backdrop {
+    background: rgb(15 27 61 / 0.45);
+  }
+
+  .sheet[open] .sheet__panel {
+    animation: sheet-up 180ms ease-out;
+  }
+
+  .sheet__panel {
+    padding: var(--space-3) var(--space-4) calc(var(--space-5) + env(safe-area-inset-bottom));
+    background: var(--color-surface);
+    border-top: var(--border-width) solid var(--color-ink);
+    border-radius: 20px 20px 0 0;
+  }
+
+  .sheet__grip {
+    width: 40px;
+    height: 4px;
+    margin: 0 auto var(--space-3);
+    border-radius: var(--radius-pill);
+    background: #c5cad6;
+  }
+
+  .sheet__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .sheet__title {
+    margin: 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  .sheet__close {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: var(--tap-size);
+    height: var(--tap-size);
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-bg-deep);
+    cursor: pointer;
+  }
+
+  .sheet__label {
+    display: block;
+    margin-bottom: var(--space-1);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-ink-muted);
+  }
+
+  .sheet__url {
+    width: 100%;
+    min-height: var(--tap-size);
+    padding: var(--space-2) var(--space-3);
+    border: 1.5px solid #8a93a8;
+    border-radius: var(--radius-tile);
+    background: var(--color-bg);
+    font-size: 0.9375rem;
+    text-overflow: ellipsis;
+  }
+
+  .sheet__actions {
+    display: grid;
+    gap: var(--space-3);
+    margin-top: var(--space-4);
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 52px;
+    padding: var(--space-3) var(--space-4);
+    border: var(--border-width) solid var(--color-ink);
+    border-radius: var(--radius-pill);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform var(--duration) ease;
+  }
+
+  .btn:active {
+    transform: translateY(2px);
+  }
+
+  .btn--primary {
+    background: var(--color-accent);
+    color: var(--color-ink);
+  }
+
+  .btn--secondary {
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+
+  .sheet__status {
+    min-height: 1.5em;
+    margin: var(--space-3) 0 0;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    text-align: center;
+  }
+
+  .sheet__status[data-tone='success'] {
+    color: var(--color-success);
+  }
+
+  .sheet__status[data-tone='success']::before {
+    content: '✓ ';
+  }
+
+  .sheet__status[data-tone='error'] {
+    color: var(--color-error);
+  }
+
+  .sheet__status[data-tone='error']::before {
+    content: '! ';
+  }
+
+  @keyframes sheet-up {
+    from {
+      transform: translateY(24px);
+      opacity: 0;
+    }
+  }
+
+  @media (min-width: 640px) {
+    .sheet {
+      width: min(440px, calc(100% - 32px));
+      margin: auto;
+    }
+
+    .sheet__panel {
+      padding: var(--space-5);
+      border: var(--border-width) solid var(--color-ink);
+      border-radius: 20px;
+      box-shadow: 0 var(--layer-offset) 0 var(--color-ink);
+    }
+
+    .sheet__grip {
+      display: none;
+    }
+  }
+</style>
