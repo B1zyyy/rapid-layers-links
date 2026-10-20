@@ -68,9 +68,13 @@ test.describe('store cards', () => {
   });
 
   for (const store of visible) {
-    test(`tapping the "${store.id}" card opens its configured link`, async ({ page }) => {
-      // Stub the destination so the test checks where the card goes without depending on the real site.
-      await page.route(/^https:\/\//, (route) => route.fulfill({ contentType: 'text/html', body: '<title>stub</title>' }));
+    test(`tapping the "${store.id}" card opens its configured link`, async ({ page, baseURL }) => {
+      // Stub other sites so the test checks where the card goes without depending on the real destination.
+      const ownOrigin = new URL(baseURL!).origin;
+      await page.route(
+        (url) => url.origin !== ownOrigin,
+        (route) => route.fulfill({ contentType: 'text/html', body: '<title>stub</title>' }),
+      );
       await page.goto('./');
       const card = page.locator(`[data-store-id="${store.id}"]`);
       // Tap near the left edge of the card (on the icon), not on the text, to prove the whole card is clickable.

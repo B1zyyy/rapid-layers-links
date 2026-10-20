@@ -31,6 +31,7 @@ npm run scan:secrets      # สแกนหา secret ใน source และ di
 npx playwright install chromium   # ครั้งแรกครั้งเดียว
 npm run test:e2e          # end-to-end tests (ต้อง build ก่อน)
 npm run verify            # check + test + build + scan + e2e
+npm run test:prod         # รัน e2e กับเว็บจริงบนอินเทอร์เน็ต (หลัง deploy)
 npm run brand:assets      # สร้างรูปโลโก้/favicon/OG ใหม่จาก brand/rapid-layers-logo-original.jpg
 ```
 
